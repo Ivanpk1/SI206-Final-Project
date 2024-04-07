@@ -1,4 +1,16 @@
 import requests
+import sqlite3
+
+def create_database():
+    """
+    Create database
+
+    Args: none
+
+    Returns: none
+    """
+    
+
 
 def get_players_by_country(country):
     """
