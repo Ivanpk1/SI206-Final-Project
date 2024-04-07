@@ -1,6 +1,13 @@
 import requests
 
-def get_nba_players_by_country(country):
+def get_players_by_country(country):
+    """
+    Retrieve NBA players from a specific country from the API
+
+    Args: country (str), country of origin
+
+    Returns: none
+    """
     url = "https://api-nba-v1.p.rapidapi.com/players"
     querystring = {"country": country}
     headers = {
@@ -25,4 +32,4 @@ def get_nba_players_by_country(country):
 
 # example
 country = input("Enter country: ")
-get_nba_players_by_country(country)
+get_players_by_country(country)
