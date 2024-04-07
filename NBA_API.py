@@ -1,16 +1,38 @@
 import requests
 import sqlite3
 
-def create_database():
+def create_table():
     """
-    Create database
+    Create table
 
     Args: none
 
     Returns: none
     """
-    
+    conn = sqlite3.connect("countries.db")
+    curr = conn.cursor()
+    curr.execute('''CREATE TABLE IF NOT EXISTS players (
+                        id INTEGER PRIMARY KEY,
+                        firstname TEXT,
+                        lastname TEXT,
+                        country TEXT
+                    )''')
+    conn.commit()
+    conn.close()
 
+def insert_players(player_info):
+    """
+    Insert player info into the table
+
+    Args: player_info (tuple), first name, last name, country
+
+    Returns: none
+    """
+    conn = sqlite3.connect("countries.db")
+    cur = conn.cursor()
+    cur.execute("INSERT INTO players (firstname, lastname, country) VALUES (?, ?, ?)", player_info)
+    conn.commit()
+    conn.close()
 
 def get_players_by_country(country):
     """
@@ -43,5 +65,6 @@ def get_players_by_country(country):
     print(f"{country} has {count} players in the NBA.")
 
 # example
+create_table()
 country = input("Enter country: ")
 get_players_by_country(country)
