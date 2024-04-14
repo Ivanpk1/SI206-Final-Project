@@ -68,3 +68,4 @@ def get_players_by_country(country):
 create_table()
 country = input("Enter country: ")
 get_players_by_country(country)
+
