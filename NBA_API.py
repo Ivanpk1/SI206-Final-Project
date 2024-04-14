@@ -30,7 +30,7 @@ def insert_players(player_info):
     """
     conn = sqlite3.connect("countries.db")
     cur = conn.cursor()
-    cur.execute("INSERT INTO players (firstname, lastname, country) VALUES (?, ?, ?)", player_info)
+    cur.execute("INSERT INTO NBA (firstname, lastname, country) VALUES (?, ?, ?)", player_info)
     conn.commit()
     conn.close()
 
