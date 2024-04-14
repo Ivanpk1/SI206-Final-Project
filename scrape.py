@@ -32,9 +32,14 @@ def populateDatabase(data, cur, conn):
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, Country TEXT UNIQUE, Population INTEGER)")
     
     #populating the data base with an id, the country name, and the population
+    counter = 0
     for i in range(len(data)):
         cur.execute("INSERT OR IGNORE INTO Countries (id, Country, Population) VALUES (?, ?, ?)", 
                     (i, data[i][0], data[i][1]))
+        
+        #limiting data entries by 25
+        if counter > 25:
+            break
         
     conn.commit()
 
