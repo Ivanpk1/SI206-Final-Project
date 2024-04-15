@@ -11,11 +11,11 @@ def create_table():
     """
     conn = sqlite3.connect("countries.db")
     curr = conn.cursor()
-    curr.execute('''CREATE TABLE IF NOT EXISTS players (
+    curr.execute('''CREATE TABLE IF NOT EXISTS NBA (
                         id INTEGER PRIMARY KEY,
                         firstname TEXT,
                         lastname TEXT,
-                        country TEXT
+                        country_id INTEGER
                     )''')
     conn.commit()
     conn.close()
@@ -29,12 +29,16 @@ def insert_players(player_info):
     Returns: none
     """
     conn = sqlite3.connect("countries.db")
-    cur = conn.cursor()
-    cur.execute("INSERT INTO NBA (firstname, lastname, country) VALUES (?, ?, ?)", player_info)
+    curr = conn.cursor()
+    for player in player_info:
+        curr.execute("SELECT id FROM Countries WHERE Country = ?", (player[2],))
+        country_id = curr.fetchone()
+        if country_id:
+            curr.execute("INSERT INTO NBA (firstname, lastname, country_id) VALUES (?, ?, ?)", (player[0], player[1], country_id[0]))
     conn.commit()
     conn.close()
 
-def get_players_by_country(country):
+def get_players():
     """
     Retrieve NBA players from a specific country from the API
 
@@ -42,30 +46,33 @@ def get_players_by_country(country):
 
     Returns: none
     """
-    url = "https://api-nba-v1.p.rapidapi.com/players"
-    querystring = {"country": country}
+    url = "http://api.balldontlie.io/v1/players"
     headers = {
-        "X-RapidAPI-Key": "1e690ea0camshae97b1517e56281p1a8b47jsnf31096b1ea77",
-        "X-RapidAPI-Host": "api-nba-v1.p.rapidapi.com"
+        "Authorization": "0fab7ce8-dd2f-403b-b6fa-4ab027f7d18e",
     }
-
-    response = requests.get(url, headers=headers, params=querystring)
+    response = requests.get(url, headers=headers)
     data = response.json()
+    print(data)
 
-    if data.get("results", 0) > 0:
-        # gather names and country
-        player_info = [(player["firstname"], player["lastname"], player["birth"]["country"]) for player in data["response"]]
-        count = len(player_info)
+    # gather names and country
+    for player in data["data"]:
+        player_info= [(player["first_name"], player["last_name"], player["country"])]
+    print(player_info)
+    # print(type(player_info))
+    count = len(player_info)   
+    print(count)  
 
-        for player in player_info:
-            print(player)
-    else:
-        print("No player was found")
-
-    print(f"{country} has {count} players in the NBA.")
+    # print(f"{country} has {count} players in the NBA.")
+    return player_info
 
 # example
 create_table()
-country = input("Enter country: ")
-get_players_by_country(country)
+
+def main():
+    players_list = get_players()
+    insert_players(players_list)
+
+main()
+
+
 
