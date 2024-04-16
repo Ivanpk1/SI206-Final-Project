@@ -31,10 +31,16 @@ def insert_players(player_info):
     conn = sqlite3.connect("countries.db")
     curr = conn.cursor()
     for player in player_info:
-        curr.execute("SELECT id FROM Countries WHERE Country = ?", (player[2],))
+        # print(player)
+        usa = player[0][2]
+        if usa == "USA":
+            usa = "United States"
+        curr.execute("SELECT id FROM Countries WHERE Country = ?", (usa,))
         country_id = curr.fetchone()
+        # print(country_id)
         if country_id:
-            curr.execute("INSERT INTO NBA (firstname, lastname, country_id) VALUES (?, ?, ?)", (player[0], player[1], country_id[0]))
+            
+            curr.execute("INSERT OR IGNORE INTO NBA (firstname, lastname, country_id) VALUES (?, ?, ?)", (player[0][0], player[0][1], country_id[0]))
     conn.commit()
     conn.close()
 
@@ -46,33 +52,32 @@ def get_players():
 
     Returns: none
     """
-    url = "http://api.balldontlie.io/v1/players"
-    headers = {
-        "Authorization": "0fab7ce8-dd2f-403b-b6fa-4ab027f7d18e",
-    }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    print(data)
+    data_list = []
+    for i in range(1,25):
+        i = str(i*25)
+        url = (f"http://api.balldontlie.io/v1/players?cursor={i}&per_page=25")
+        print(url)
+        headers = {
+            "Authorization": "0fab7ce8-dd2f-403b-b6fa-4ab027f7d18e",
+        }
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        # print(data)
 
-    # gather names and country
-    for player in data["data"]:
-        player_info= [(player["first_name"], player["last_name"], player["country"])]
-    print(player_info)
-    # print(type(player_info))
-    count = len(player_info)   
-    print(count)  
+        # gather names and country
+        for player in data["data"]:
+            player_info= [(player["first_name"], player["last_name"], player["country"])]
+            # print(player_info)
+            if player_info not in data_list:
+                print(player_info)
+                data_list.append(player_info)
+    print(len(data_list))
+    return data_list
 
-    # print(f"{country} has {count} players in the NBA.")
-    return player_info
-
-# example
-create_table()
 
 def main():
+    create_table()
     players_list = get_players()
     insert_players(players_list)
 
 main()
-
-
-
