@@ -13,27 +13,14 @@ def setupDatabase(filename):
     return cur, conn
 
 def populateDatabase(data, cur, conn):
-    '''
-    data: list of tuples with countries and their population [(country, population)]
-    cur, conn: cursos for the database
-    Returns: None
-    Description: Creates a table for the countries, and inserts id, the country name, and 
-    population into the table. Really only needs to be run once.         
-    '''
-        
+    
     #creating tables if not exist
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, Country TEXT UNIQUE, Population INTEGER)")
     
     #populating the data base with an id, the country name, and the population
-    counter = 0
     for i in range(len(data)):
         cur.execute("INSERT OR IGNORE INTO Countries (id, Country, Population) VALUES (?, ?, ?)", 
-                    (i, data[i][0], data[i][1]))
-        
-        #limiting data entries by 25
-        if counter > 25:
-            break
-        
+                    (i, data[i][0], data[i][1]))        
     conn.commit()
 
 def getData(soup):
