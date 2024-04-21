@@ -39,7 +39,6 @@ def insert_players(player_info):
         country_id = curr.fetchone()
         # print(country_id)
         if country_id:
-            
             curr.execute("INSERT OR IGNORE INTO NBA (firstname, lastname, country_id) VALUES (?, ?, ?)", (player[0][0], player[0][1], country_id[0]))
     conn.commit()
     conn.close()
@@ -73,7 +72,6 @@ def get_players():
                 data_list.append(player_info)
     print(len(data_list))
     return data_list
-
 
 def main():
     create_table()
