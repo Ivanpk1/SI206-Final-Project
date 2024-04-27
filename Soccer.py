@@ -4,8 +4,6 @@ import time
 import os
 import sqlite3
 
-# ids_list = ['88', '99', '13201', '128', '165', '423', '149', '1135', '1078', '139', '490', '172', '1087', '162', '155', '90', '151', '82', '84', '109', '86', '106', '107', '96', '92', '121', '91', '143', '103', '94', '98', '3225', '123', '126', '131', '271', '211', '205', '197', '266', '351', '259', '251', '4957', '255', '1098', '306', '214', '263', '260', '208', '333', '320', '1744', '166', '152', '150', '1419', '154', '174', '182', '2960', '559', '176', '187', '179', '552', '185', '1390', '183', '189', '558', '1420', '554', '27', '26', '25', '24', '59', '62', '33', '31', '20', '19', '56', '52', '35', '30', '46', '60', '28', '29', '18', '51']
-
 def get_team_ids(football_clubs):
     ids_list = []
     for team in football_clubs:
@@ -25,6 +23,7 @@ def setup_teams_table(cur, conn, football_clubs):
     cur.execute(
         "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, name TEXT)"
     )
+    teams = []
     for team in football_clubs:
         url = f'http://api.isportsapi.com/sport/football/team/search?api_key=LEF2p56y5YYXmVnw&name={team}'
         response = requests.get(url)
@@ -34,11 +33,20 @@ def setup_teams_table(cur, conn, football_clubs):
         team_name = ''
         if team == "Angers":
             team_name = dictionary['data'][3]['name']
+            teams.append(team_name)
         else:
             team_name = dictionary['data'][0]['name']
-        cur.execute("INSERT INTO Teams (name) VALUES (?)", (team_name,))
+            teams.append(team_name)
         time.sleep(5)
-    conn.commit()
+
+    count = 0
+    for team in teams:
+        cur.execute("INSERT OR IGNORE INTO Teams (name) VALUES (?)", (team,))
+        conn.commit()  
+        if cur.rowcount != 0:
+            count += 1
+        if count == 25:
+            break
 
 
 
@@ -47,6 +55,8 @@ def setup_players_table(cur, conn, ids_list):
         "CREATE TABLE IF NOT EXISTS Soccer (id INTEGER PRIMARY KEY, name TEXT, country_id INTEGER, team_id INTEGER)"
     )
     count = 0
+    index = 0
+    players = {}
     for ids in ids_list:
         url = f'http://api.isportsapi.com/sport/football/player?api_key=LEF2p56y5YYXmVnw&teamId={ids}'
         response = requests.get(url)
@@ -54,19 +64,29 @@ def setup_players_table(cur, conn, ids_list):
         dictionary = json.loads(json_string)
         print(dictionary)
         for data in dictionary['data']:
-            cur.execute("SELECT id FROM Countries WHERE Country = ?", (data['country'],))
-            country_id = cur.fetchone()
-            team_name = football_clubs[count]
-            team_name = team_name.replace('_', ' ')
-            cur.execute("SELECT id FROM Teams WHERE team_name = ?", (team_name,))
-            team_id = cur.fetchone()
-            if country_id:
-                cur.execute("INSERT INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], country_id[0], team_id[0]))
-            else:
-                cur.execute("INSERT INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], -1, team_id[0]))
-        count += 1
+            players[data['name']] = data['country']
         time.sleep(10)
-    conn.commit()
+    
+    for player in players:
+        cur.execute("SELECT id FROM Countries WHERE Country = ?", (players[player],))
+        country_id = cur.fetchone()
+        team_name = football_clubs[index]
+        team_name = team_name.replace('_', ' ')
+        cur.execute("SELECT id FROM Teams WHERE team_name = ?", (team_name,))
+        team_id = cur.fetchone()
+        if country_id:
+            cur.execute("INSERT INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], country_id[0], team_id[0]))
+            conn.commit()  
+            if cur.rowcount != 0:
+                count += 1
+        else:
+            cur.execute("INSERT INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], -1, team_id[0]))
+            conn.commit()
+            if cur.rowcount != 0:
+                count += 1
+        if count == 25:
+            break
+        index += 1
 
 
 def main():
