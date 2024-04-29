@@ -34,8 +34,21 @@ def populateDatabase(data, cur, conn):
     #populating the data base with an id, the country name, and the population
     counter = 0
     for i in range(len(data)):
-        cur.execute("INSERT OR IGNORE INTO Countries (id, Country, Population) VALUES (?, ?, ?)", 
+    
+        query = "SELECT * FROM Countries WHERE Country = ?"
+        value = data[i][0]
+        cur.execute(query, (value,))
+        result = cur.fetchone()
+        if result is not None:
+            continue
+        else:                                                        
+            cur.execute("INSERT OR IGNORE INTO Countries (id, Country, Population) VALUES (?, ?, ?)",
                     (i, data[i][0], data[i][1]))
+            counter += 1
+            print(i, data[i][0], data[i][1])
+        #limiting data entries by 25
+        if counter > 25:
+            break
         
     conn.commit()
 
