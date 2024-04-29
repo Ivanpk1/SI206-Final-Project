@@ -84,6 +84,8 @@ def calculations(nba_counts, soccer_counts):
     
     # json text file
         data = {
+        'nba_counts': nba_counts,
+        'soccer_counts': soccer_counts,
         'nba_countries': nba_countries,
         'nba_perc': nba_perc,
         'soccer_countries': soccer_countries,
