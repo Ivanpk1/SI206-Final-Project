@@ -75,12 +75,12 @@ def setup_players_table(cur, conn, ids_list):
         cur.execute("SELECT id FROM Teams WHERE team_name = ?", (team_name,))
         team_id = cur.fetchone()
         if country_id:
-            cur.execute("INSERT INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], country_id[0], team_id[0]))
+            cur.execute("INSERT OR IGNORE INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], country_id[0], team_id[0]))
             conn.commit()  
             if cur.rowcount != 0:
                 count += 1
         else:
-            cur.execute("INSERT INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], -1, team_id[0]))
+            cur.execute("INSERT OR IGNORE INTO Soccer (name, country_id, team_id) VALUES (?, ?, ?)", (data['name'], -1, team_id[0]))
             conn.commit()
             if cur.rowcount != 0:
                 count += 1
