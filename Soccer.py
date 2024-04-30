@@ -7,7 +7,7 @@ import sqlite3
 def get_team_ids(football_clubs):
     ids_list = []
     for team in football_clubs:
-        url = f'http://api.isportsapi.com/sport/football/team/search?api_key=LEF2p56y5YYXmVnw&name={team}'
+        url = f'http://api.isportsapi.com/sport/football/team/search?api_key=EcW5k9amDCfFxIJh&name={team}'
         response = requests.get(url)
         json_string = response.content.decode('utf-8')
         dictionary = json.loads(json_string)
@@ -15,7 +15,7 @@ def get_team_ids(football_clubs):
             ids_list.append(dictionary['data'][3]['teamId'])
         else:
             ids_list.append(dictionary['data'][0]['teamId'])
-        time.sleep(5)
+        time.sleep(10)
     return ids_list
 
 
@@ -25,7 +25,7 @@ def setup_teams_table(cur, conn, football_clubs):
     )
     teams = []
     for team in football_clubs:
-        url = f'http://api.isportsapi.com/sport/football/team/search?api_key=LEF2p56y5YYXmVnw&name={team}'
+        url = f'http://api.isportsapi.com/sport/football/team/search?api_key=EcW5k9amDCfFxIJh&name={team}'
         response = requests.get(url)
         json_string = response.content.decode('utf-8')
         dictionary = json.loads(json_string)
@@ -37,7 +37,7 @@ def setup_teams_table(cur, conn, football_clubs):
         else:
             team_name = dictionary['data'][0]['name']
             teams.append(team_name)
-        time.sleep(5)
+        time.sleep(10)
 
     count = 0
     for team in teams:
@@ -58,7 +58,7 @@ def setup_players_table(cur, conn, ids_list):
     index = 0
     players = {}
     for ids in ids_list:
-        url = f'http://api.isportsapi.com/sport/football/player?api_key=LEF2p56y5YYXmVnw&teamId={ids}'
+        url = f'http://api.isportsapi.com/sport/football/player?api_key=EcW5k9amDCfFxIJh&teamId={ids}'
         response = requests.get(url)
         json_string = response.content.decode('utf-8')
         dictionary = json.loads(json_string)
@@ -117,11 +117,11 @@ def main():
     "West_Bromwich", "Sheffield_United"
 ]
     path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path + "/" + 'countries.db')
+    conn = sqlite3.connect(path + "/" + 'temp.db')
     cur = conn.cursor()
-    ids_list = get_team_ids(football_clubs)
+    # ids_list = get_team_ids(football_clubs)
     setup_teams_table(cur, conn, football_clubs)
-    setup_players_table(cur, conn, ids_list)
+    # setup_players_table(cur, conn, ids_list)
     conn.close()
 
 main()
